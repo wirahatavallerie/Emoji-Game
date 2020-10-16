@@ -6,6 +6,7 @@ const scoreDisplay = document.getElementById('score');
 const button = document.getElementById('button')
 
 let isJump = true;
+let startCount = 0;
 let score;
 let highscore = localStorage.getItem('highscore') ? localStorage.getItem('highscore') : 0;
 let speed;
@@ -13,6 +14,7 @@ let animationSpeed;
 let tempSpeed;
 let isPlaying;
 const setMarginHalangan = 900
+const animationStart = 'paused'
 const setHalangan = ["halangan-1.png", "halangan-2.png", "halangan-3.png"];
 const mouseClickAudio = new Audio('http://127.0.0.1:5500/emojigame/sounds/sfx_mouse_click-2.wav');
 const jumpClickAudio = new Audio('http://127.0.0.1:5500/emojigame/sounds/sfx_wing.wav');
@@ -29,14 +31,18 @@ function init(){
     halangan.style.marginLeft = setMarginHalangan + "px"
     button.innerHTML = "START";
     scoreDisplay.innerHTML = score;
+    highscoreDisplay.innerHTML = highscore;
     canvas.style.animationDuration = animationSpeed + 's';
-    canvas.style.animationPlayState = "paused"
+    canvas.style.animationPlayState = animationStart
 }
 
 function startGame(){
     isPlaying = true
+    startCount++
     button.style.display = "none";
-    canvas.style.animationPlayState = "running";
+    if(isPlaying){
+        canvas.style.animationPlayState = 'running';
+    }
     var marginHalangan = parseInt(halangan.style.marginLeft)
 
     setInterval(() => {
@@ -74,13 +80,13 @@ function startGame(){
 function crash(){
     let marginHalangan = parseInt(halangan.style.marginLeft)
     let charTop = parseInt(window.getComputedStyle(character).getPropertyValue('top'))
-
+    
     if((marginHalangan <= 100 && marginHalangan > 50) && charTop > -150){
+        end()
         character.setAttribute('src', 'img/game-over.png');
         button.style.display = "block";
+        canvas.style.animationPlayState = animationStart;
         button.innerHTML = "RESTART";
-        canvasAnimation = document.getElementById('canvas')
-        canvasAnimation.style.animationPlayState = 'paused';
 
         if(score > highscore){
             highscore = score;
@@ -90,6 +96,12 @@ function crash(){
         highscoreDisplay.innerHTML = highscore;
         dieAudio.play()
         isStart = false
+    }
+}
+
+function end(){
+    for(let index = 0; index <= startCount; index++){
+        clearInterval(index)
     }
 }
 
@@ -109,8 +121,8 @@ function startJump(){
     }
 }
 
-document.addEventListener('keydown', () => {
-    if(isPlaying){
+document.addEventListener('keydown', (e) => {
+    if(isPlaying && e.key === ' '){
         startJump()
     }
 })
